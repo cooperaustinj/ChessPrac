@@ -584,13 +584,7 @@ export function ChecklistChess() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{ textDecoration: 'none' }}
-                                        onClick={() =>
-                                            plausibleEvent('checklist:lichess-link', {
-                                                props: {
-                                                    'checklist:lichess-link': `https://lichess.org/training/${gameState.puzzleId}`,
-                                                },
-                                            })
-                                        }
+                                        onClick={() => plausibleEvent('checklist:lichess-link')}
                                     >
                                         <IconLink size={16} style={{ marginRight: 3, marginBottom: -2 }} stroke={1.5} />
                                         Lichess Rating: {gameState.rating}
@@ -608,13 +602,7 @@ export function ChecklistChess() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{ textDecoration: 'none' }}
-                                    onClick={() =>
-                                        plausibleEvent('checklist:lichess-link', {
-                                            props: {
-                                                'checklist:lichess-link': `https://lichess.org/training/${gameState.puzzleId}`,
-                                            },
-                                        })
-                                    }
+                                    onClick={() => plausibleEvent('checklist:lichess-link')}
                                 >
                                     <IconLink size={16} style={{ marginRight: 3, marginBottom: -2 }} stroke={1.5} />
                                     Lichess Rating: {gameState.rating}
