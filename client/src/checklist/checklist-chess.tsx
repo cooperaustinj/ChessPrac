@@ -468,7 +468,6 @@ export function ChecklistChess() {
         return verboseMove.san
     }
 
-    // Add handler for closing rules
     const handleRulesClose = () => {
         setRulesOpen(false)
         plausibleEvent('checklist:rules-read')
@@ -478,7 +477,6 @@ export function ChecklistChess() {
         }
     }
 
-    // Add this function near other handlers
     const handleVerify = () => {
         const remaining = getRemainingMoves()
         if (remaining === 0) {
