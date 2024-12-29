@@ -505,13 +505,12 @@ export function DoubleStrikeChess() {
         })
     }
 
-    // Update rules modal close handler
     const handleRulesClose = () => {
         setRulesOpen(false)
+        plausibleEvent('double-strike:rules-read')
         if (!hasReadRules) {
             localStorage.setItem(RULES_READ_KEY, 'true')
             setHasReadRules(true)
-            plausibleEvent('double-strike:rules-read')
         }
     }
 

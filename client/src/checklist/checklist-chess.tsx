@@ -471,10 +471,10 @@ export function ChecklistChess() {
     // Add handler for closing rules
     const handleRulesClose = () => {
         setRulesOpen(false)
+        plausibleEvent('checklist:rules-read')
         if (!hasReadRules) {
             localStorage.setItem('checklistChessRulesRead', 'true')
             setHasReadRules(true)
-            plausibleEvent('checklist:rules-read')
         }
     }
 
