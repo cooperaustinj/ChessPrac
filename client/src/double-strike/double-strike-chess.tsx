@@ -180,12 +180,7 @@ export function DoubleStrikeChess() {
             setIsActive(false)
             // Play win sound when puzzle is completed
             winSound.play().catch(err => console.error('Error playing sound:', err))
-            plausibleEvent('double-strike:win', {
-                props: {
-                    time: elapsedTime,
-                    moves: gameState.moveCount.size,
-                },
-            })
+            plausibleEvent('double-strike:win')
         }
     }, [remainingPieces, isActive])
 
@@ -248,11 +243,7 @@ export function DoubleStrikeChess() {
             })
 
             if (!isInitial) {
-                plausibleEvent('double-strike:new-puzzle', {
-                    props: {
-                        pieceCount: randomPieceCount,
-                    },
-                })
+                plausibleEvent('double-strike:new-puzzle')
             }
         } finally {
             setIsGenerating(false)

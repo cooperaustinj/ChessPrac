@@ -485,11 +485,7 @@ export function ChecklistChess() {
                 winSound.play()
                 setIsActive(false)
                 setIsComplete(true)
-                plausibleEvent('checklist:win', {
-                    props: {
-                        time: elapsedTime,
-                    },
-                })
+                plausibleEvent('checklist:win')
             } else {
                 successSound.play()
                 setGameState(prev => ({
@@ -500,7 +496,7 @@ export function ChecklistChess() {
                 setShowRemainingCount(false)
                 plausibleEvent('checklist:phase-complete', {
                     props: {
-                        phase: 'checks',
+                        'checklist:phase': 'checks',
                     },
                 })
             }
@@ -512,8 +508,7 @@ export function ChecklistChess() {
             })
             plausibleEvent('checklist:verify-failed', {
                 props: {
-                    remaining,
-                    phase: gameState.phase,
+                    'checklist:phase': gameState.phase,
                 },
             })
         }
@@ -591,7 +586,9 @@ export function ChecklistChess() {
                                         style={{ textDecoration: 'none' }}
                                         onClick={() =>
                                             plausibleEvent('checklist:lichess-link', {
-                                                props: { link: `https://lichess.org/training/${gameState.puzzleId}` },
+                                                props: {
+                                                    'checklist:lichess-link': `https://lichess.org/training/${gameState.puzzleId}`,
+                                                },
                                             })
                                         }
                                     >
@@ -613,7 +610,9 @@ export function ChecklistChess() {
                                     style={{ textDecoration: 'none' }}
                                     onClick={() =>
                                         plausibleEvent('checklist:lichess-link', {
-                                            props: { link: `https://lichess.org/training/${gameState.puzzleId}` },
+                                            props: {
+                                                'checklist:lichess-link': `https://lichess.org/training/${gameState.puzzleId}`,
+                                            },
                                         })
                                     }
                                 >
