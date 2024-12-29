@@ -25,6 +25,7 @@ import { WhiteKing } from '../components/WhiteKing'
 import { BlackKing } from '../components/BlackKing'
 import { useMediaQuery, useDocumentTitle } from '@mantine/hooks'
 import classes from './checklist-chess.module.css'
+import { plausibleEvent } from '../plausible'
 
 type Phase = 'checks' | 'captures'
 type Move = { from: Square; to: Square }
@@ -172,6 +173,10 @@ export function ChecklistChess() {
                 rating: data.puzzle.rating,
                 isLoaded: true,
             })
+
+            if (!isInitial) {
+                plausibleEvent('checklist:new-puzzle')
+            }
         } catch (error) {
             notifications.show({
                 message: 'Failed to load puzzle. Please try again.',
@@ -468,6 +473,7 @@ export function ChecklistChess() {
         if (!hasReadRules) {
             localStorage.setItem('checklistChessRulesRead', 'true')
             setHasReadRules(true)
+            plausibleEvent('checklist:rules-read')
         }
     }
 
@@ -479,6 +485,11 @@ export function ChecklistChess() {
                 winSound.play()
                 setIsActive(false)
                 setIsComplete(true)
+                plausibleEvent('checklist:win', {
+                    props: {
+                        time: elapsedTime,
+                    },
+                })
             } else {
                 successSound.play()
                 setGameState(prev => ({
@@ -487,12 +498,23 @@ export function ChecklistChess() {
                     foundMoves: [],
                 }))
                 setShowRemainingCount(false)
+                plausibleEvent('checklist:phase-complete', {
+                    props: {
+                        phase: 'checks',
+                    },
+                })
             }
         } else {
             failSound.play()
             notifications.show({
                 message: `You have more moves to find!`,
                 color: 'red',
+            })
+            plausibleEvent('checklist:verify-failed', {
+                props: {
+                    remaining,
+                    phase: gameState.phase,
+                },
             })
         }
     }
@@ -567,6 +589,11 @@ export function ChecklistChess() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{ textDecoration: 'none' }}
+                                        onClick={() =>
+                                            plausibleEvent('checklist:lichess-link', {
+                                                props: { link: `https://lichess.org/training/${gameState.puzzleId}` },
+                                            })
+                                        }
                                     >
                                         <IconLink size={16} style={{ marginRight: 3, marginBottom: -2 }} stroke={1.5} />
                                         Lichess Rating: {gameState.rating}
@@ -584,6 +611,11 @@ export function ChecklistChess() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{ textDecoration: 'none' }}
+                                    onClick={() =>
+                                        plausibleEvent('checklist:lichess-link', {
+                                            props: { link: `https://lichess.org/training/${gameState.puzzleId}` },
+                                        })
+                                    }
                                 >
                                     <IconLink size={16} style={{ marginRight: 3, marginBottom: -2 }} stroke={1.5} />
                                     Lichess Rating: {gameState.rating}
@@ -883,7 +915,10 @@ export function ChecklistChess() {
                                             <Button
                                                 variant="outline"
                                                 size="md"
-                                                onClick={() => setShowRemainingCount(true)}
+                                                onClick={() => {
+                                                    setShowRemainingCount(true)
+                                                    plausibleEvent('checklist:show-count')
+                                                }}
                                                 disabled={isComplete}
                                             >
                                                 Show Count
@@ -892,7 +927,10 @@ export function ChecklistChess() {
                                             <Button
                                                 variant="outline"
                                                 size="md"
-                                                onClick={() => setShowSolution(true)}
+                                                onClick={() => {
+                                                    setShowSolution(true)
+                                                    plausibleEvent('checklist:show-solution')
+                                                }}
                                                 disabled={showSolution}
                                             >
                                                 Solution

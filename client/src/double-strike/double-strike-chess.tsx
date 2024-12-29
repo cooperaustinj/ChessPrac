@@ -23,6 +23,7 @@ import { notifications } from '@mantine/notifications'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { MyChessboard } from '../components/my-chessboard'
 import { useDocumentTitle } from '@mantine/hooks'
+import { plausibleEvent } from '../plausible'
 
 // Add type for piece with unique ID
 type TrackedPiece = {
@@ -179,6 +180,12 @@ export function DoubleStrikeChess() {
             setIsActive(false)
             // Play win sound when puzzle is completed
             winSound.play().catch(err => console.error('Error playing sound:', err))
+            plausibleEvent('double-strike:win', {
+                props: {
+                    time: elapsedTime,
+                    moves: gameState.moveCount.size,
+                },
+            })
         }
     }, [remainingPieces, isActive])
 
@@ -239,6 +246,14 @@ export function DoubleStrikeChess() {
                 board: fenToBoard(newFen),
                 moveCount: new Map(),
             })
+
+            if (!isInitial) {
+                plausibleEvent('double-strike:new-puzzle', {
+                    props: {
+                        pieceCount: randomPieceCount,
+                    },
+                })
+            }
         } finally {
             setIsGenerating(false)
         }
@@ -481,6 +496,7 @@ export function DoubleStrikeChess() {
             message: 'Link copied to clipboard',
             color: 'blue',
         })
+        plausibleEvent('double-strike:share')
     }
 
     // Format time as MM:SS
@@ -500,6 +516,11 @@ export function DoubleStrikeChess() {
     // Update rules modal close handler
     const handleRulesClose = () => {
         setRulesOpen(false)
+        if (!hasReadRules) {
+            localStorage.setItem(RULES_READ_KEY, 'true')
+            setHasReadRules(true)
+            plausibleEvent('double-strike:rules-read')
+        }
     }
 
     const handleFenChange = (newFen: string) => {
@@ -531,6 +552,8 @@ export function DoubleStrikeChess() {
         setIsActive(false) // Stop the timer
         setShowSolution(false)
         setSolution([])
+
+        plausibleEvent('double-strike:custom-position')
     }
 
     return (
@@ -629,8 +652,10 @@ export function DoubleStrikeChess() {
                                             <Button
                                                 variant="outline"
                                                 size="md"
-                                                onClick={retryPuzzle}
-                                                className="plausible-event-name=double-strike:reset"
+                                                onClick={() => {
+                                                    retryPuzzle()
+                                                    plausibleEvent('double-strike:reset')
+                                                }}
                                             >
                                                 Reset Puzzle
                                             </Button>
@@ -717,7 +742,10 @@ export function DoubleStrikeChess() {
                                     <Button
                                         variant="outline"
                                         size="md"
-                                        onClick={() => setShowSolution(!showSolution)}
+                                        onClick={() => {
+                                            setShowSolution(!showSolution)
+                                            plausibleEvent(`double-strike:${showSolution ? 'hide' : 'show'}-solution`)
+                                        }}
                                         disabled={!solution.length}
                                     >
                                         {showSolution ? 'Hide Solution' : 'Solution'}
