@@ -215,6 +215,7 @@ export function DoubleStrikeChess() {
             try {
                 await gen.generate(randomPieceCount)
             } catch (err) {
+                plausibleEvent('double-strike:generation-failed')
                 notifications.show({
                     message: 'Puzzle generation failed. Please try again or choose fewer pieces.',
                     color: 'red',

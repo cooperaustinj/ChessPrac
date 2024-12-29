@@ -67,6 +67,7 @@ const getRandomDifficulty = (): Difficulty => {
 const loadPuzzleById = async (puzzleId: string) => {
     const response = await fetch(`https://lichess.org/api/puzzle/${puzzleId}`)
     if (!response.ok) {
+        plausibleEvent('checklist:puzzle-load-failed')
         throw new Error('Failed to load puzzle')
     }
     const data = await response.json()
