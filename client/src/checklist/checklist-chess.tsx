@@ -14,7 +14,6 @@ import {
     ActionIcon,
     Modal,
     Tooltip,
-    useMantineTheme,
 } from '@mantine/core'
 import { IconListDetails, IconCheck, IconInfoCircle, IconLink } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
@@ -26,6 +25,7 @@ import { BlackKing } from '../components/BlackKing'
 import { useMediaQuery, useDocumentTitle } from '@mantine/hooks'
 import classes from './checklist-chess.module.css'
 import { plausibleEvent } from '../plausible'
+import { createSound, playSound } from '../utils/sound'
 
 type Phase = 'checks' | 'captures'
 type Move = { from: Square; to: Square }
@@ -50,11 +50,11 @@ type CustomSquareStyles = {
     }
 }
 
-const moveSound = new Audio('/move.mp3')
-const captureSound = new Audio('/capture.mp3')
-const successSound = new Audio('/success.mp3')
-const failSound = new Audio('/fail.wav')
-const winSound = new Audio('/win.wav')
+const moveSound = createSound('/move.mp3')
+const captureSound = createSound('/capture.mp3')
+const successSound = createSound('/success.mp3')
+const failSound = createSound('/fail.wav')
+const winSound = createSound('/win.wav')
 
 const DIFFICULTIES = ['easier', 'normal', 'harder', 'hardest'] as const
 type Difficulty = (typeof DIFFICULTIES)[number]
@@ -310,11 +310,11 @@ export function ChecklistChess() {
 
             // Play different sounds based on the phase and if it's a capture
             if (gameState.phase === 'checks' && isCapture) {
-                captureSound.play()
+                playSound(captureSound)
             } else if (gameState.phase === 'checks') {
-                moveSound.play()
+                playSound(moveSound)
             } else {
-                captureSound.play()
+                playSound(captureSound)
             }
 
             setCorrectSquare(to)
@@ -481,12 +481,12 @@ export function ChecklistChess() {
         const remaining = getRemainingMoves()
         if (remaining === 0) {
             if (gameState.phase === 'captures') {
-                winSound.play()
+                playSound(winSound)
                 setIsActive(false)
                 setIsComplete(true)
                 plausibleEvent('checklist:win')
             } else {
-                successSound.play()
+                playSound(successSound)
                 setGameState(prev => ({
                     ...prev,
                     phase: 'captures',
@@ -500,7 +500,7 @@ export function ChecklistChess() {
                 })
             }
         } else {
-            failSound.play()
+            playSound(failSound)
             notifications.show({
                 message: `You have more moves to find!`,
                 color: 'red',

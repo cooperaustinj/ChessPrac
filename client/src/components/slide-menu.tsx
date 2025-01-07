@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Group, Text, Box, UnstyledButton, ActionIcon } from '@mantine/core'
-import { IconMenu2, IconListDetails, IconSwords, IconBrandGithub } from '@tabler/icons-react'
+import { IconMenu2, IconListDetails, IconSwords, IconBrandGithub, IconShieldOff } from '@tabler/icons-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import classes from './slide-menu.module.css'
 
@@ -14,6 +14,7 @@ export function SlideMenu() {
     // Determine which route is active
     const isDoubleStrike = location.pathname.startsWith('/double-strike')
     const isChecklist = location.pathname.startsWith('/checklist')
+    const isUndefended = location.pathname.startsWith('/undefended')
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -80,11 +81,19 @@ export function SlideMenu() {
                     <span>Double Strike</span>
                 </Box>
                 <Box
+                    mb="xs"
                     className={`${classes.menuItem} ${isChecklist ? classes.active : ''}`}
                     onClick={() => handleClick('/checklist')}
                 >
                     <IconListDetails size={20} />
                     <span>Checklist</span>
+                </Box>
+                <Box
+                    className={`${classes.menuItem} ${isUndefended ? classes.active : ''}`}
+                    onClick={() => handleClick('/undefended')}
+                >
+                    <IconShieldOff size={20} />
+                    <span>Undefended</span>
                 </Box>
             </Box>
         </>

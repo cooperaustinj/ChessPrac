@@ -24,6 +24,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { MyChessboard } from '../components/my-chessboard'
 import { useDocumentTitle } from '@mantine/hooks'
 import { plausibleEvent } from '../plausible'
+import { createSound, playSound } from '../utils/sound'
 
 // Add type for piece with unique ID
 type TrackedPiece = {
@@ -116,8 +117,8 @@ export function DoubleStrikeChess() {
     const [elapsedTime, setElapsedTime] = useState(0)
     const [isGenerating, setIsGenerating] = useState(false)
     const [rulesOpen, setRulesOpen] = useState(false)
-    const captureSound = new Audio('/capture.mp3')
-    const winSound = new Audio('/win.wav')
+    const captureSound = createSound('/capture.mp3')
+    const winSound = createSound('/win.wav')
     const [isActive, setIsActive] = useState(false)
     const [hasReadRules, setHasReadRules] = useState(() => {
         return localStorage.getItem(RULES_READ_KEY) === 'true'
@@ -179,7 +180,7 @@ export function DoubleStrikeChess() {
         } else if (remainingPieces === 1 && isActive) {
             setIsActive(false)
             // Play win sound when puzzle is completed
-            winSound.play().catch(err => console.error('Error playing sound:', err))
+            playSound(winSound)
             plausibleEvent('double-strike:win')
         }
     }, [remainingPieces, isActive])
@@ -404,7 +405,7 @@ export function DoubleStrikeChess() {
             moveCount: newMoveCount,
         })
 
-        captureSound.play().catch(err => console.error('Error playing sound:', err))
+        playSound(captureSound)
         return true
     }
 
@@ -439,7 +440,7 @@ export function DoubleStrikeChess() {
             moveCount: newMoveCount,
         })
 
-        captureSound.play().catch(err => console.error('Error playing sound:', err))
+        playSound(captureSound)
         return true
     }
 
