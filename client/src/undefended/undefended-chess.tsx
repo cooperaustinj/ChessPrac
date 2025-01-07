@@ -118,6 +118,21 @@ const playSound = (sound: HTMLAudioElement) => {
     sound.play()
 }
 
+// Add this helper function
+const isEitherKingInCheck = (fen: string): boolean => {
+    const chess = new Chess(fen)
+
+    // Check white king
+    const whiteInCheck = chess.inCheck()
+
+    // Switch turn to black and check black king
+    const blackFen = chess.fen().replace(/ w /, ' b ')
+    chess.load(blackFen)
+    const blackInCheck = chess.inCheck()
+
+    return whiteInCheck || blackInCheck
+}
+
 export function UndefendedChess() {
     useDocumentTitle('Undefended | ChessPrac')
     const navigate = useNavigate()
@@ -174,44 +189,63 @@ export function UndefendedChess() {
     const generateNewPuzzle = async (isInitial: boolean = false) => {
         setIsLoading(true)
         try {
-            const difficulty = getRandomDifficulty()
-            const response = await fetch(`https://lichess.org/api/puzzle/next?difficulty=${difficulty}`)
-            const data = await response.json()
+            let validPuzzleFound = false
+            let attempts = 0
+            const maxAttempts = 10 // Prevent infinite loops
 
-            const chess = new Chess()
-            const moves = data.game.pgn.split(' ')
-            moves.forEach((move: string) => {
-                if (move.match(/^\d+\./) || move === '') return
-                try {
-                    chess.move(move)
-                } catch (e) {
-                    console.error('Invalid move:', move)
+            while (!validPuzzleFound && attempts < maxAttempts) {
+                const difficulty = getRandomDifficulty()
+                const response = await fetch(`https://lichess.org/api/puzzle/next?difficulty=${difficulty}`)
+                const data = await response.json()
+
+                const chess = new Chess()
+                const moves = data.game.pgn.split(' ')
+                moves.forEach((move: string) => {
+                    if (move.match(/^\d+\./) || move === '') return
+                    try {
+                        chess.move(move)
+                    } catch (e) {
+                        console.error('Invalid move:', move)
+                    }
+                })
+
+                const fen = chess.fen()
+
+                // Skip this puzzle if either king is in check
+                if (isEitherKingInCheck(fen)) {
+                    attempts++
+                    continue
                 }
-            })
 
-            const fen = chess.fen()
-            const undefendedSquares = findUndefendedSquares(fen)
+                const undefendedSquares = findUndefendedSquares(fen)
 
-            if (!isInitial || !location.search) {
-                const searchParams = new URLSearchParams()
-                searchParams.set('puzzle', data.puzzle.id)
-                navigate(`?${searchParams.toString()}`, { replace: isInitial })
+                if (!isInitial || !location.search) {
+                    const searchParams = new URLSearchParams()
+                    searchParams.set('puzzle', data.puzzle.id)
+                    navigate(`?${searchParams.toString()}`, { replace: isInitial })
+                }
+
+                setElapsedTime(0)
+                setIsActive(false)
+
+                setGameState({
+                    fen,
+                    undefendedSquares,
+                    foundSquares: [],
+                    puzzleId: data.puzzle.id,
+                    rating: data.puzzle.rating,
+                    isLoaded: true,
+                })
+
+                if (!isInitial) {
+                    plausibleEvent('undefended:new-puzzle')
+                }
+
+                validPuzzleFound = true
             }
 
-            setElapsedTime(0)
-            setIsActive(false)
-
-            setGameState({
-                fen,
-                undefendedSquares,
-                foundSquares: [],
-                puzzleId: data.puzzle.id,
-                rating: data.puzzle.rating,
-                isLoaded: true,
-            })
-
-            if (!isInitial) {
-                plausibleEvent('undefended:new-puzzle')
+            if (!validPuzzleFound) {
+                throw new Error('Could not find valid puzzle after multiple attempts')
             }
         } catch (error) {
             notifications.show({
@@ -250,6 +284,13 @@ export function UndefendedChess() {
                 })
 
                 const fen = chess.fen()
+
+                // If either king is in check, generate a new puzzle instead
+                if (isEitherKingInCheck(fen)) {
+                    await generateNewPuzzle(false)
+                    return
+                }
+
                 const undefendedSquares = findUndefendedSquares(fen)
 
                 setGameState({
